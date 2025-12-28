@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>Azizi Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- ربط ملف التنسيقات -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <div class="app-inner">
+
+      <div class="content">
+        <!-- LOGIN -->
+        <div id="loginSection" class="auth-wrapper">
+          <div class="auth-card">
+            <div class="auth-header">
+              <div class="auth-logo">💬</div>
+              <div>
+                <h2 class="auth-title">Azizi Chat</h2>
+                <p class="auth-subtitle">سجل الدخول أو أنشئ حسابًا جديدًا للبدء في الدردشة</p>
+              </div>
+            </div>
+            <div id="authAlert" class="auth-alert" style="display:none;"></div>
+
+
+            <!-- أزرار التبويب: تسجيل دخول / إنشاء حساب -->
+            <div class="auth-tabs">
+              <button type="button" class="auth-tab auth-tab-active" data-tab="login">
+                تسجيل دخول
+              </button>
+              <button type="button" class="auth-tab" data-tab="register">
+                إنشاء حساب جديد
+              </button>
+            </div>
+
+            <div class="auth-body">
+              <!-- لوحة تسجيل الدخول -->
+              <div class="auth-panel auth-panel-active" data-panel="login">
+                <label class="auth-label" for="loginIdentifier">
+                  البريد الإلكتروني أو اسم المستخدم:
+                </label>
+                <input
+                  type="text"
+                  id="loginIdentifier"
+                  class="auth-input"
+                  placeholder="اكتب بريدك الإلكتروني أو اسم المستخدم"
+                >
+
+                <label class="auth-label" for="loginPassword">
+                  كلمة المرور:
+                </label>
+                <input
+                  type="password"
+                  id="loginPassword"
+                  class="auth-input"
+                  placeholder="اكتب كلمة المرور"
+                >
+
+                <button type="button" class="btn btn-main auth-submit" id="btnLogin">
+                  تسجيل الدخول
+                </button>
+              </div>
+
+              <!-- لوحة إنشاء حساب جديد -->
+              <div class="auth-panel" data-panel="register">
+                <label class="auth-label" for="regUsername">
+                  اسم المستخدم:
+                </label>
+                <input
+                  type="text"
+                  id="regUsername"
+                  class="auth-input"
+                  placeholder="اختر اسم المستخدم"
+                >
+
+                <label class="auth-label" for="regEmail">
+                  البريد الإلكتروني:
+                </label>
+                <input
+                  type="email"
+                  id="regEmail"
+                  class="auth-input"
+                  placeholder="example@mail.com"
+                >
+
+                <label class="auth-label" for="regPassword">
+                  كلمة المرور:
+                </label>
+                <input
+                  type="password"
+                  id="regPassword"
+                  class="auth-input"
+                  placeholder="كلمة المرور (6 أحرف على الأقل)"
+                >
+
+                <button type="button" class="btn btn-main auth-submit" id="btnRegister">
+                  إنشاء الحساب
+                </button>
+              </div>
+            </div>
+
+            <!-- صندوق تفعيل البريد الإلكتروني -->
+            <div id="verifyBox" class="verify-box" style="display: none;">
+              <p class="verify-title">تم إنشاء الحساب 🎉</p>
+              <p class="verify-text">
+                تم إرسال كود تفعيل إلى بريدك الإلكتروني.
+                <br>
+                أدخل الكود هنا لتفعيل حسابك ومتابعة الدخول إلى الشات.
+              </p>
+
+              <label class="auth-label" for="verifyCode">
+                كود التفعيل:
+              </label>
+              <input
+                type="text"
+                id="verifyCode"
+                class="auth-input"
+                placeholder="مثال: 123456"
+              >
+
+              <button type="button" class="btn btn-main auth-submit" id="btnVerifyCode">
+                تفعيل البريد الإلكتروني والدخول
+              </button>
+
+              <p class="verify-hint">
+                لم يصلك الكود؟ تفقد مجلد الرسائل غير المرغوب فيها (Spam) أو جرّب بريدًا آخر.
+              </p>
+
+              <!-- 🔹 عدّاد إعادة الإرسال -->
+              <p class="verify-timer" id="verifyTimer" style="display: none;">
+                يمكنك طلب كود جديد بعد
+                <span id="verifyTimerValue">60</span>
+                ثانية.
+              </p>
+
+              <!-- 🔹 زر إعادة الإرسال -->
+              <button type="button" class="btn btn-main auth-submit" id="btnResendCode" style="display: none;">
+                إعادة إرسال الكود
+              </button>
+
+              <button type="button" class="btn auth-back" id="btnBackToRegister">
+                ⬅ الرجوع لتعديل البيانات
+              </button>
+            </div>
+
+
+            <p class="auth-footer-text">
+              بعد تسجيل الدخول، يمكنك اختيار أي مستخدم من القائمة أعلى صفحة الشات للتحدث معه.
+            </p>
+          </div>
+        </div>
+
+        <!-- CHAT -->
+        <div id="chatSection">
+          <div class="chat-layout">
+          <!-- قسم إدارة جهات الاتصال -->
+          <div class="contacts-section">
+            <div class="contacts-tabs">
+              <button class="contacts-tab contacts-tab-active" data-tab="contacts">جهات الاتصال</button>
+              <button class="contacts-tab" data-tab="add-contact">إضافة جهة اتصال</button>
+              <button class="contacts-tab" data-tab="requests">طلبات الصداقة</button>
+            </div>
+
+            <!-- sidebar: قائمة جهات الاتصال كاملة (تشبه واتساب) -->
+            <div class="contacts-panel contacts-panel-active" data-panel="contacts">
+              <div class="contacts-search">
+                <input type="text" id="contactsSearch" class="auth-input" placeholder="ابحث في جهات الاتصال">
+              </div>
+              <div id="contactsList" class="contacts-list">
+                <p class="loading-text">لا توجد جهات اتصال بعد</p>
+              </div>
+            </div>
+
+            <!-- تبويب إضافة جهة اتصال -->
+            <div class="contacts-panel" data-panel="add-contact">
+              <div class="add-contact-form">
+                <h3>إضافة جهة اتصال جديدة</h3>
+                <label for="newContactUsername">اسم المستخدم:</label>
+                <input type="text" id="newContactUsername" class="auth-input" placeholder="أدخل اسم المستخدم">
+                <button class="btn btn-main" id="btnSendContactRequest">إرسال طلب صداقة</button>
+                <div id="contactRequestMessage" class="contact-message" style="display: none;"></div>
+              </div>
+            </div>
+
+            <!-- تبويب طلبات الصداقة -->
+            <div class="contacts-panel" data-panel="requests">
+              <h3>طلبات الصداقة الواردة</h3>
+              <div id="pendingRequestsList" class="requests-list">
+                <p class="loading-text">جاري التحميل...</p>
+              </div>
+            </div>
+          </div>
+
+            <div class="main">
+            <div class="chat-header" id="chatHeader" style="display:none; padding:10px 14px; border-bottom:1px solid rgba(0,0,0,0.04);">
+              <div style="display:flex;flex-direction:row-reverse;align-items:center;gap:12px;">
+                <div id="chatHeaderAvatar" class="contact-avatar" style="width:44px;height:44px;font-size:18px;"></div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                  <div id="chatHeaderName" style="font-weight:800;color:#0f172a;font-size:16px;"></div>
+                  <div id="chatHeaderStatus" style="font-size:12px;color:#6b7280;margin-top:2px;">متصل</div>
+                </div>
+              </div>
+            </div>
+            <div class="messages" id="messages">
+              <p class="no-chat-selected" style="text-align: center; ">لم يتم اختيار أي محادثة بعد. الرجاء اختيار جهة اتصال من القائمة للبدء في الدردشة.</p>
+            </div>
+
+            <form id="chatForm" class="input-bar">
+              <input type="text" id="message" class="message-input" placeholder="اكتب رسالتك..." required>
+              <button type="submit" class="btn btn-main">إرسال</button>
+            </form>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- سكربت socket.io من السيرفر -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- سكربت الواجهة الأمامية -->
+  <script src="script.js"></script>
+</body>
+</html>

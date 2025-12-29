@@ -656,6 +656,9 @@ app.post("/api/verify-email", async (req, res) => {
 });
 // 🔐 API: تسجيل الدخول بواسطة (إيميل أو اسم مستخدم) + كلمة مرور
 app.post("/api/login", async (req, res) => {
+  const dbg = await new sql.Request().query("SELECT @@SERVERNAME AS server, DB_NAME() AS db");
+  console.log("🧭 LOGIN DB:", dbg.recordset[0]);
+
   try {
     const { login, password } = req.body;
 

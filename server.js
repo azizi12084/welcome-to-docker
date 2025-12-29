@@ -8,6 +8,17 @@ const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
 const { sql, config } = require("./db");
+
+(async () => {
+  try {
+    const r = await new sql.Request().query("SELECT @@SERVERNAME AS server, DB_NAME() AS db");
+    console.log("🧭 Connected to DB:", r.recordset[0]);
+  } catch (e) {
+    console.error("❌ Could not query DB identity:", e.message);
+  }
+})();
+
+
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const pendingUsers = new Map();
@@ -656,9 +667,7 @@ app.post("/api/verify-email", async (req, res) => {
 });
 // 🔐 API: تسجيل الدخول بواسطة (إيميل أو اسم مستخدم) + كلمة مرور
 app.post("/api/login", async (req, res) => {
-  const dbg = await new sql.Request().query("SELECT @@SERVERNAME AS server, DB_NAME() AS db");
-  console.log("🧭 LOGIN DB:", dbg.recordset[0]);
-
+  
   try {
     const { login, password } = req.body;
 

@@ -9,15 +9,6 @@ const { Server } = require("socket.io");
 const path = require("path");
 const { sql, config } = require("./db");
 
-(async () => {
-  try {
-    const r = await new sql.Request().query("SELECT @@SERVERNAME AS server, DB_NAME() AS db");
-    console.log("🧭 Connected to DB:", r.recordset[0]);
-  } catch (e) {
-    console.error("❌ Could not query DB identity:", e.message);
-  }
-})();
-
 
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
@@ -40,6 +31,9 @@ app.use(express.static(path.join(__dirname, "public")));
   try {
     console.log('DB startup config -> server:', config.server, 'port:', config.port, 'encrypt:', config.options && config.options.encrypt, 'trustServerCertificate:', config.options && config.options.trustServerCertificate);
     await sql.connect(config);
+    const r = await new sql.Request().query("SELECT @@SERVERNAME AS server, DB_NAME() AS db");
+    console.log("🧭 Connected to DB:", r.recordset[0]);
+
     console.log("✅ DB connected in server.js");
   } catch (err) {
     console.error("❌ DB connect error in server.js:", err);

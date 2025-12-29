@@ -2,11 +2,8 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-
-// Minimal, non-secret env preview to diagnose runtime values inside App Service
-console.log('ENV PREVIEW -> DB_HOST:', process.env.DB_HOST, 'MSSQL_HOST:', process.env.MSSQL_HOST, 'APPSETTING_DB_HOST:', process.env.APPSETTING_DB_HOST);
-
 const express = require("express");
+const helmet = require("helmet");
 const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
@@ -17,6 +14,8 @@ const pendingUsers = new Map();
 let nextPendingId = 1;
 
 const app = express();
+app.disable('x-powered-by');
+app.use(helmet());
 const server = http.createServer(app);
 const io = new Server(server);
 
@@ -28,7 +27,6 @@ app.use(express.static(path.join(__dirname, "public")));
 
 (async () => {
   try {
-    // Log the effective DB host/port and TLS settings (no secrets)
     console.log('DB startup config -> server:', config.server, 'port:', config.port, 'encrypt:', config.options && config.options.encrypt, 'trustServerCertificate:', config.options && config.options.trustServerCertificate);
     await sql.connect(config);
     console.log("✅ DB connected in server.js");
@@ -42,7 +40,7 @@ app.use(express.static(path.join(__dirname, "public")));
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT) || 587,
-  secure: false, // عادة 587 يكون false
+  secure: false, 
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS
@@ -211,12 +209,6 @@ app.post("/api/users", async (req, res) => {
     res.status(500).json({ error: "DB error" });
   }
 });
-
-// ========== تسجيل مستخدم جديد مع إرسال كود تفعيل ==========
-
-// ========== تسجيل مستخدم جديد مع إرسال كود تفعيل ==========
-
-// ========== تسجيل مستخدم جديد مع إرسال كود تفعيل (تخزين في الذاكرة فقط) ==========
 
 // 🧑‍🤝‍🧑 API: جلب قائمة الأصدقاء المقبولين لمستخدم
 app.get("/api/contacts/:username", async (req, res) => {
@@ -511,9 +503,6 @@ app.post("/api/register", async (req, res) => {
         return res.status(429).json({ error: msg });
       }
 
-      // في هذه المرحلة: مسموح بإرسال كود جديد لنفس الإيميل/اليوزر
-
-      // نحدّث بياناته (لو غيّر الاسم أو كلمة المرور)
       p.username = cleanUsername;
       p.email    = cleanEmail;
       p.passwordHash = await hashPassword(password);
@@ -526,12 +515,7 @@ app.post("/api/register", async (req, res) => {
       // تحديث عدد مرات الإعادة
       p.resendCount += 1;
 
-      // تحديد التأخير قبل السماح بالإرسال القادم:
-      // الإرسال الأول حصل سابقًا
-      // الإرسال الثاني  (resendCount = 1) → بعد 1 دقيقة
-      // الإرسال الثالث  (resendCount = 2) → بعد 1 ساعة
-      // الإرسال الرابع+ (resendCount >=3) → بعد 24 ساعة
-      let delayMs;
+          let delayMs;
       if (p.resendCount === 1) {
         delayMs = 1 * 60 * 1000;          // 1 دقيقة
       } else if (p.resendCount === 2) {
@@ -566,9 +550,7 @@ app.post("/api/register", async (req, res) => {
       });
     }
 
-    // ===== حالة: لا يوجد طلب pending لنفس الإيميل/اليوزر → إنشاء طلب جديد =====
-
-    // Hash كلمة المرور
+   
     const passwordHash = await hashPassword(password);
 
     // توليد كود التفعيل الأول + صلاحية 10 دقائق
@@ -591,10 +573,7 @@ app.post("/api/register", async (req, res) => {
       console.log("Verification email sent to:", cleanEmail, "code:", code);
     } catch (emailErr) {
       console.error("Error sending verification email:", emailErr);
-      // لو أردت إلغاء الطلب عند الفشل:
-      // pendingUsers.delete(pendingId);
-      // return res.status(500).json({ error: "فشل إرسال البريد الإلكتروني" });
-    }
+        }
 
     return res.json({
       success: true,
@@ -612,14 +591,6 @@ app.post("/api/register", async (req, res) => {
     return res.status(500).json({ error: "خطأ في السيرفر" });
   }
 });
-
-
-
-
-
-// ========== التحقق من كود التفعيل ==========
-
-// ========== التحقق من كود التفعيل وإنشاء المستخدم الحقيقي في Users ==========
 
 app.post("/api/verify-email", async (req, res) => {
   const { userId, code } = req.body; // userId هنا = pendingId من الذاكرة
@@ -683,9 +654,6 @@ app.post("/api/verify-email", async (req, res) => {
     return res.status(500).json({ error: "خطأ في السيرفر" });
   }
 });
-
-
-// 🔐 API: تسجيل الدخول بواسطة (إيميل أو اسم مستخدم) + كلمة مرور
 // 🔐 API: تسجيل الدخول بواسطة (إيميل أو اسم مستخدم) + كلمة مرور
 app.post("/api/login", async (req, res) => {
   try {
@@ -701,7 +669,7 @@ app.post("/api/login", async (req, res) => {
     const loginValue = login.trim();
 
     // 2) البحث عن المستخدم حسب الإيميل أو اسم المستخدم
-    let request = new sql.Request();
+    const request = new sql.Request();
     const result = await request
       .input("Login", sql.NVarChar(100), loginValue)
       .query(`
@@ -722,7 +690,12 @@ app.post("/api/login", async (req, res) => {
       return res.status(401).json({ error: "كلمة المرور غير صحيحة" });
     }
 
-    // 4) نجاح تسجيل الدخول
+    // 4) تحديث LastLogin بعد نجاح التحقق
+    await new sql.Request()
+      .input("Id", sql.Int, user.Id)
+      .query("UPDATE Users SET LastLogin = SYSDATETIME() WHERE Id = @Id");
+
+    // 5) نجاح تسجيل الدخول
     return res.json({
       success: true,
       user: {
@@ -736,8 +709,6 @@ app.post("/api/login", async (req, res) => {
     return res.status(500).json({ error: "خطأ في السيرفر" });
   }
 });
-
-
 
 // 📨 API: جلب رسائل محادثة بين شخصين (تاريخ المحادثة)
 app.get("/api/messages", async (req, res) => {

@@ -1,28 +1,4 @@
-/*
-const sql = require('mssql');
 
-const sqlConfig = {
-    user: "azzuz",                           // من JSON
-    password: "كلمة_المرور_الخاصة_بك",       // إذا نسيتها أعد تعيينها
-    database: "ChatDB",                       // اسم قاعدة البيانات
-    server: "azizichat-sqlsrv.database.windows.net",
-    options: {
-        encrypt: true,
-        trustServerCertificate: true
-    }
-};
-
-async function connectDB() {
-    try {
-        await sql.connect(sqlConfig);
-        console.log("✅ DB connected successfully");
-    } catch (err) {
-        console.error("❌ DB connect error:", err);
-    }
-}
-
-connectDB();
-*/
 const sql = require("mssql");
 
 // تحديد بيئة التشغيل
@@ -45,3 +21,6 @@ module.exports = {
   sql,
   config
 };
+if (!config.server || !config.user || !config.password || !config.database) {
+  throw new Error("Database configuration is incomplete");
+}

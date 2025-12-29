@@ -21,7 +21,7 @@ app.use(helmet());
 const server = http.createServer(app);
 const io = new Server(server);
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -903,6 +903,10 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("❌ User disconnected:", socket.id);
   });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
 });
 
 server.listen(PORT, () => {

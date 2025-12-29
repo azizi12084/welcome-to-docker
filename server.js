@@ -691,10 +691,17 @@ app.post("/api/login", async (req, res) => {
     }
 
     // 4) تحديث LastLogin بعد نجاح التحقق
-    await new sql.Request()
+    try{
+      await new sql.Request()
       .input("Id", sql.Int, user.Id)
       .query("UPDATE Users SET LastLogin = SYSDATETIME() WHERE Id = @Id");
 
+
+    }catch(e){
+      console.warn("Could not update LastLogin:", e.message);
+    }
+    
+    
     // 5) نجاح تسجيل الدخول
     return res.json({
       success: true,

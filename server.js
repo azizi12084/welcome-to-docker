@@ -1,4 +1,10 @@
-require("dotenv").config();
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
+
+// Minimal, non-secret env preview to diagnose runtime values inside App Service
+console.log('ENV PREVIEW -> DB_HOST:', process.env.DB_HOST, 'MSSQL_HOST:', process.env.MSSQL_HOST, 'APPSETTING_DB_HOST:', process.env.APPSETTING_DB_HOST);
 
 const express = require("express");
 const http = require("http");
@@ -22,6 +28,8 @@ app.use(express.static(path.join(__dirname, "public")));
 
 (async () => {
   try {
+    // Log the effective DB host/port and TLS settings (no secrets)
+    console.log('DB startup config -> server:', config.server, 'port:', config.port, 'encrypt:', config.options && config.options.encrypt, 'trustServerCertificate:', config.options && config.options.trustServerCertificate);
     await sql.connect(config);
     console.log("✅ DB connected in server.js");
   } catch (err) {

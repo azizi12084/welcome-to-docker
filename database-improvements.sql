@@ -7,7 +7,7 @@
 -- ============================================
 
 -- إضافة حقل CreatedAt
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'CreatedAt')
+IF OBJECT_ID('Users','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'CreatedAt')
 BEGIN
     ALTER TABLE Users ADD CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME();
     PRINT 'تم إضافة حقل CreatedAt إلى جدول Users';
@@ -15,7 +15,7 @@ END
 GO
 
 -- إضافة حقل LastLogin
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'LastLogin')
+IF OBJECT_ID('Users','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'LastLogin')
 BEGIN
     ALTER TABLE Users ADD LastLogin DATETIME2 NULL;
     PRINT 'تم إضافة حقل LastLogin إلى جدول Users';
@@ -23,7 +23,7 @@ END
 GO
 
 -- إضافة حقل IsActive
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'IsActive')
+IF OBJECT_ID('Users','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'IsActive')
 BEGIN
     ALTER TABLE Users ADD IsActive BIT NOT NULL DEFAULT 1;
     PRINT 'تم إضافة حقل IsActive إلى جدول Users';
@@ -31,7 +31,7 @@ END
 GO
 
 -- إضافة فهرس على Email (إذا لم يكن موجوداً)
-IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Users_Email' AND object_id = OBJECT_ID('Users'))
+IF OBJECT_ID('Users','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Users_Email' AND object_id = OBJECT_ID('Users'))
 BEGIN
     CREATE INDEX IX_Users_Email ON Users(Email) WHERE Email IS NOT NULL;
     PRINT 'تم إضافة فهرس IX_Users_Email';
@@ -42,10 +42,18 @@ GO
 -- 2. تحسينات جدول Contacts
 -- ============================================
 
--- ملاحظة: CreatedAt موجود بالفعل ✓
+-- ملاحظة: إذا لم يكن الحقل CreatedAt موجوداً، فسنقوم بإنشائه أولاً
+
+-- إضافة حقل CreatedAt (آمن)
+IF OBJECT_ID('Contacts','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Contacts') AND name = 'CreatedAt')
+BEGIN
+    ALTER TABLE Contacts ADD CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME();
+    PRINT 'تم إضافة حقل CreatedAt إلى جدول Contacts';
+END
+GO
 
 -- إضافة حقل UpdatedAt
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Contacts') AND name = 'UpdatedAt')
+IF OBJECT_ID('Contacts','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Contacts') AND name = 'UpdatedAt')
 BEGIN
     ALTER TABLE Contacts ADD UpdatedAt DATETIME2 NULL;
     PRINT 'تم إضافة حقل UpdatedAt إلى جدول Contacts';
@@ -53,7 +61,7 @@ END
 GO
 
 -- إضافة فهرس على Status
-IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Contacts_Status' AND object_id = OBJECT_ID('Contacts'))
+IF OBJECT_ID('Contacts','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Contacts_Status' AND object_id = OBJECT_ID('Contacts'))
 BEGIN
     CREATE INDEX IX_Contacts_Status ON Contacts(Status);
     PRINT 'تم إضافة فهرس IX_Contacts_Status';
@@ -61,7 +69,7 @@ END
 GO
 
 -- إضافة فهرس مركب على (UserId, Status) للبحث السريع عن طلبات الصداقة
-IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Contacts_UserId_Status' AND object_id = OBJECT_ID('Contacts'))
+IF OBJECT_ID('Contacts','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Contacts_UserId_Status' AND object_id = OBJECT_ID('Contacts'))
 BEGIN
     CREATE INDEX IX_Contacts_UserId_Status ON Contacts(UserId, Status);
     PRINT 'تم إضافة فهرس IX_Contacts_UserId_Status';
@@ -69,7 +77,7 @@ END
 GO
 
 -- إضافة فهرس على ContactUserId للبحث السريع عن الطلبات الواردة
-IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Contacts_ContactUserId' AND object_id = OBJECT_ID('Contacts'))
+IF OBJECT_ID('Contacts','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Contacts_ContactUserId' AND object_id = OBJECT_ID('Contacts'))
 BEGIN
     CREATE INDEX IX_Contacts_ContactUserId ON Contacts(ContactUserId);
     PRINT 'تم إضافة فهرس IX_Contacts_ContactUserId';
@@ -81,7 +89,7 @@ GO
 -- ============================================
 
 -- إضافة فهرس على RoomId
-IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Messages_RoomId' AND object_id = OBJECT_ID('Messages'))
+IF OBJECT_ID('Messages','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Messages_RoomId' AND object_id = OBJECT_ID('Messages'))
 BEGIN
     CREATE INDEX IX_Messages_RoomId ON Messages(RoomId);
     PRINT 'تم إضافة فهرس IX_Messages_RoomId';
@@ -89,7 +97,7 @@ END
 GO
 
 -- إضافة فهرس مركب على (RoomId, CreatedAt) للترتيب الزمني
-IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Messages_RoomId_CreatedAt' AND object_id = OBJECT_ID('Messages'))
+IF OBJECT_ID('Messages','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Messages_RoomId_CreatedAt' AND object_id = OBJECT_ID('Messages'))
 BEGIN
     CREATE INDEX IX_Messages_RoomId_CreatedAt ON Messages(RoomId, CreatedAt);
     PRINT 'تم إضافة فهرس IX_Messages_RoomId_CreatedAt';
@@ -97,7 +105,7 @@ END
 GO
 
 -- إضافة حقل IsRead
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Messages') AND name = 'IsRead')
+IF OBJECT_ID('Messages','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Messages') AND name = 'IsRead')
 BEGIN
     ALTER TABLE Messages ADD IsRead BIT NOT NULL DEFAULT 0;
     PRINT 'تم إضافة حقل IsRead إلى جدول Messages';
@@ -105,7 +113,7 @@ END
 GO
 
 -- إضافة حقل IsDeleted (soft delete)
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Messages') AND name = 'IsDeleted')
+IF OBJECT_ID('Messages','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Messages') AND name = 'IsDeleted')
 BEGIN
     ALTER TABLE Messages ADD IsDeleted BIT NOT NULL DEFAULT 0;
     PRINT 'تم إضافة حقل IsDeleted إلى جدول Messages';
@@ -113,7 +121,7 @@ END
 GO
 
 -- إضافة فهرس على IsDeleted للبحث السريع
-IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Messages_IsDeleted' AND object_id = OBJECT_ID('Messages'))
+IF OBJECT_ID('Messages','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Messages_IsDeleted' AND object_id = OBJECT_ID('Messages'))
 BEGIN
     CREATE INDEX IX_Messages_IsDeleted ON Messages(IsDeleted) WHERE IsDeleted = 0;
     PRINT 'تم إضافة فهرس IX_Messages_IsDeleted';
@@ -125,7 +133,7 @@ GO
 -- ============================================
 
 -- إضافة حقل CreatedAt
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Rooms') AND name = 'CreatedAt')
+IF OBJECT_ID('Rooms','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Rooms') AND name = 'CreatedAt')
 BEGIN
     ALTER TABLE Rooms ADD CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME();
     PRINT 'تم إضافة حقل CreatedAt إلى جدول Rooms';
@@ -133,7 +141,7 @@ END
 GO
 
 -- إضافة حقل LastMessageAt
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Rooms') AND name = 'LastMessageAt')
+IF OBJECT_ID('Rooms','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Rooms') AND name = 'LastMessageAt')
 BEGIN
     ALTER TABLE Rooms ADD LastMessageAt DATETIME2 NULL;
     PRINT 'تم إضافة حقل LastMessageAt إلى جدول Rooms';
@@ -141,7 +149,7 @@ END
 GO
 
 -- إضافة فهرس على IsPrivate
-IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Rooms_IsPrivate' AND object_id = OBJECT_ID('Rooms'))
+IF OBJECT_ID('Rooms','U') IS NOT NULL AND NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Rooms_IsPrivate' AND object_id = OBJECT_ID('Rooms'))
 BEGIN
     CREATE INDEX IX_Rooms_IsPrivate ON Rooms(IsPrivate);
     PRINT 'تم إضافة فهرس IX_Rooms_IsPrivate';
@@ -207,28 +215,37 @@ GO
 -- 8. إنشاء View لجهات الاتصال المقبولة
 -- ============================================
 
-IF EXISTS (SELECT * FROM sys.views WHERE name = 'vw_AcceptedContacts')
-    DROP VIEW vw_AcceptedContacts;
-GO
+IF OBJECT_ID('Contacts','U') IS NOT NULL AND OBJECT_ID('Users','U') IS NOT NULL
+   AND EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Contacts') AND name = 'CreatedAt')
+   AND EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('Contacts') AND name = 'UpdatedAt')
+BEGIN
+    IF OBJECT_ID('vw_AcceptedContacts','V') IS NOT NULL
+        DROP VIEW vw_AcceptedContacts;
 
-CREATE VIEW vw_AcceptedContacts
-AS
-SELECT 
-    c.Id,
-    c.UserId,
-    u1.Username AS UserUsername,
-    c.ContactUserId,
-    u2.Username AS ContactUsername,
-    c.Status,
-    c.CreatedAt,
-    c.UpdatedAt
-FROM Contacts c
-INNER JOIN Users u1 ON c.UserId = u1.Id
-INNER JOIN Users u2 ON c.ContactUserId = u2.Id
-WHERE c.Status = 'accepted';
-GO
+    DECLARE @sql NVARCHAR(MAX) = N'
+    CREATE VIEW vw_AcceptedContacts AS
+    SELECT 
+        c.Id,
+        c.UserId,
+        u1.Username AS UserUsername,
+        c.ContactUserId,
+        u2.Username AS ContactUsername,
+        c.Status,
+        c.CreatedAt,
+        c.UpdatedAt
+    FROM Contacts c
+    INNER JOIN Users u1 ON c.UserId = u1.Id
+    INNER JOIN Users u2 ON c.ContactUserId = u2.Id
+    WHERE c.Status = ''accepted'';
+    ';
 
-PRINT 'تم إنشاء View vw_AcceptedContacts';
+    EXEC sp_executesql @sql;
+    PRINT 'تم إنشاء View vw_AcceptedContacts';
+END
+ELSE
+BEGIN
+    PRINT 'تخطي إنشاء vw_AcceptedContacts: الجداول أو الأعمدة المطلوبة غير موجودة بعد';
+END
 GO
 
 -- ============================================
@@ -244,14 +261,14 @@ AS
 SELECT 
     m.Id,
     m.RoomId,
-    m.UserId,
+    m.SenderId AS SenderId,
     u.Username,
     m.Content,
     m.CreatedAt,
     m.IsRead,
     r.Name AS RoomName
 FROM Messages m
-INNER JOIN Users u ON m.UserId = u.Id
+INNER JOIN Users u ON m.SenderId = u.Id
 INNER JOIN Rooms r ON m.RoomId = r.Id
 WHERE m.IsRead = 0 AND m.IsDeleted = 0;
 GO
